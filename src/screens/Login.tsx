@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import { Button, Text, Input } from '@rneui/base';
-import { useState } from 'react';
+import { useState, useContext  } from 'react';
 import { login } from '../service/auth.service';
+import AuthContext from '../contexts/auth';
 
 
 const screen = Dimensions.get("screen");
@@ -11,21 +12,16 @@ const vh = screen.height;
 const vw = screen.width;
 
 export default function Login() {
+  const { signed, user, token, signIn } = useContext(AuthContext);
 
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
 
 
-  async function clickLogin(){
-    
-    await login(username, password).then(
-      (res) => {
-        alert(res.token)
-      },
-      (error) => {
-        alert(error)
-      }
-    )
+  function clickLogin(){
+    signIn(username, password)
+    console.log(token)
+    console.log(user)
   }
 
 
