@@ -34,7 +34,7 @@ export const AuthProvider = (props: any) => {
                 setUser(JSON.parse(storagedUser));
                 setToken(storagedToken)
                 setSigned(true)
-                api.defaults.headers.Authorization = `Baerer ${storagedToken}`;
+                api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
 
             }
             setLoading(false);

@@ -2,6 +2,9 @@ import { StyleSheet, View, Dimensions } from 'react-native';
 import { Text, Button } from '@rneui/base';
 import { useState, useContext  } from 'react';
 import AuthContext from '../contexts/auth';
+import {getProcessoId} from '../service/processos.service';
+import {api} from "../service/api";
+
 
 const screen = Dimensions.get("screen");
 
@@ -12,8 +15,21 @@ export default function Home() {
 
     const {signOut} = useContext(AuthContext)
 
+
+    async function getTest() {
+        await getProcessoId('d70e3c5d-3bc9-455e-be39-96a4dab18f98')
+        .then((res) => {
+            console.log(res)
+        })
+        .catch((e) => {
+            console.log(e)
+        })
+        // console.log(api.defaults.headers.Authorization)
+    }
+
     function clickSair(){
-        signOut();
+        // signOut();
+        // getTest()
     }
 
     return (
