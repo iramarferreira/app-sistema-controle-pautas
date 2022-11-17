@@ -2,14 +2,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const { Screen, Navigator } = createNativeStackNavigator();
 
-import Login from './screens/Login';
-import Home from './screens/Home';
+import Login from '../screens/Login';
 
-export function Routes() {
+// Rotas que podem ser acessadas sem estar autenticado
+export function AuthRoutes() {
     return (
       <Navigator>
         <Screen name="Login" component={Login}></Screen>
-        <Screen name='Home' component={Home}></Screen>
       </Navigator>
     );
   }

@@ -1,5 +1,7 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
-import { Text } from '@rneui/base';
+import { Text, Button } from '@rneui/base';
+import { useState, useContext  } from 'react';
+import AuthContext from '../contexts/auth';
 
 const screen = Dimensions.get("screen");
 
@@ -8,11 +10,20 @@ const vw = screen.width;
 
 export default function Home() {
 
+    const {signOut} = useContext(AuthContext)
+
+    function clickSair(){
+        signOut();
+    }
+
     return (
 
         <View style={styles.container}>
 
             <Text>Hello World</Text>
+            <Button title='Sair'
+            onPress={clickSair}
+            />
         </View>
     )
 
