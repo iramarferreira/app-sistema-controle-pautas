@@ -11,21 +11,11 @@ const screen = Dimensions.get("screen");
 const vh = screen.height;
 const vw = screen.width;
 
-export default function Home() {
+export default function CadastrarPauta() {
 
     const {signOut} = useContext(AuthContext)
 
 
-    async function getTest() {
-        await getProcessoId('d70e3c5d-3bc9-455e-be39-96a4dab18f98')
-        .then((res) => {
-            console.log(res)
-        })
-        .catch((e) => {
-            console.log(e)
-        })
-        // console.log(api.defaults.headers.Authorization)
-    }
 
     function clickSair(){
         signOut();
@@ -36,7 +26,7 @@ export default function Home() {
 
         <View style={styles.container}>
 
-            <Text>Hello World</Text>
+            <Text>Cadastrar Pauta</Text>
             <Button title='Sair'
             onPress={clickSair}
             />
