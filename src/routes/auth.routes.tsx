@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AddUser from '../screens/AddUser';
 
 const { Screen, Navigator } = createNativeStackNavigator();
 
@@ -9,6 +10,7 @@ export function AuthRoutes() {
     return (
       <Navigator>
         <Screen name="Login" component={Login}></Screen>
+        <Screen name="AddUser" component={AddUser} options={{ title: 'Cadastro de usuário' }}></Screen>
       </Navigator>
     );
   }

@@ -47,10 +47,15 @@ export const AuthProvider = (props: any) => {
     // Função para fazer login
     async function signIn(username: string, password: string) {
 
+        if(username == '' || password == ''){
+            alert('Preenche todos os campos')
+            return 
+        }
+
         let response = undefined
         await authService.login(username, password).then(
             (res) => {
-                alert(res.token)
+                // alert(res.token)
                 response = res
 
             },

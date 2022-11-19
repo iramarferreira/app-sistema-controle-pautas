@@ -28,7 +28,7 @@ export default function Home() {
     }
 
     function clickSair(){
-        // signOut();
+        signOut();
         // getTest()
     }
 

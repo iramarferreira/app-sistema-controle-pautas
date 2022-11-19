@@ -2,11 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Dimensions, ActivityIndicator } from 'react-native';
 import { Button, Text, Input, Image } from '@rneui/base';
 import { useState, useContext } from 'react';
-import { login } from '../service/auth.service';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AuthContext from '../contexts/auth';
 import logoTST from '../assets/logo_tst.png';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from './RootStackParamList';
+import {register} from '../service/auth.service';
+import { UserRegister } from '../models/UserRegister';
 
 
 const BASE_URI_logo = Image.resolveAssetSource(logoTST).uri;
@@ -17,20 +18,58 @@ const vh = screen.height;
 const vw = screen.width;
 
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'AddUser'>;
 
 
-export default function Login({navigation }: Props) {
+export default function AddUser({navigation }: Props) {
   const { signed, user, token, signIn } = useContext(AuthContext);
 
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
 
 
-  function clickLogin() {
-    signIn(username, password)
-    console.log(token)
-    console.log(user)
+
+  async function cadastrarUser() {
+    let roles = ['user']
+    let userRegister: UserRegister = {};
+    if(username == ''){
+      alert('Preenche o nome do usuário')
+      return 
+    }
+    else if(email == ''){
+      alert('Preenche um email')
+      return 
+    }
+    userRegister.username = username
+    userRegister.email = email
+    userRegister.role = roles
+    userRegister.password = password
+
+    // cadastrar um usuário
+    await register(userRegister)
+      .then((res) => {
+        if(res.status === 200){
+          alert("Usuário cadastrado")
+          navigation.navigate('Login')
+        }else{
+          alert('Aconteceu algum erro no cadastro do usuário')
+          alert(res.data)
+        }
+      })
+      .catch((e) => {
+        console.log(e.response.data)
+        if(e.response.status === 400 && e.response.data?.message.includes('Username')){
+          alert('Nome de usuário já existente')
+        }
+        else if(e.response.status === 400 && e.response.data?.message.includes('Email')){
+          alert('Email já existente')
+        }
+        else if(e.response.status === 500){
+          alert('Error')
+        }
+    })
+   
   }
 
 
@@ -54,22 +93,28 @@ export default function Login({navigation }: Props) {
         />
 
         <Input style={styles.textInput}
-          placeholder='senha'
+          placeholder='Senha (6 a 40 caracteres)'
           secureTextEntry={true}
           onChangeText={value => setPassword(value)}
         />
 
+        <Input style={styles.textInput}
+          placeholder='Email'
+          onChangeText={value => setEmail(value)}
+        />
+
+
         <Button
-          title='Entrar'
+          title='Cadastrar'
           buttonStyle={{
             backgroundColor: '#01426A',
           }}
-          onPress={clickLogin}
-          disabled={(password.length < 6 || password.length > 40) || (username.length == 0)}
+          onPress={cadastrarUser}
+          disabled={(password.length < 6 || password.length > 40) || (!(email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)?.length > 0))}
         />
 
         <Button
-          title='Cadastro'
+          title='Cancelar'
           buttonStyle={{
             backgroundColor: '#DCDCDC',
           }}
@@ -77,8 +122,7 @@ export default function Login({navigation }: Props) {
             marginTop: 10,
           }}
           titleStyle={{ marginHorizontal: 20, color: 'black' }}
-         
-          onPress={() => navigation.navigate('AddUser')}
+          onPress={() => navigation.navigate('Login')}
         />
 
       </View>
