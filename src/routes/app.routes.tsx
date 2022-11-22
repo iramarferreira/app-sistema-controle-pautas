@@ -23,14 +23,11 @@ export function AppRoutes() {
       tabBarIconStyle: { display: "none" }
 
     }}>
-      <Screen name='Processos' component={Processos} options={{
-        title: 'Processos'
-       
-
-      }}></Screen>
-      <Screen name='CadastrarProcessos' component={CadastrarProcessos} options={{ title: 'Cadastrar Processos' }}></Screen>
       <Screen name='Pautas' component={Pautas} options={{ title: 'Pautas' }}></Screen>
       <Screen name='CadastrarPauta' component={CadastrarPauta} options={{ title: 'Cadastrar Pauta' }} ></Screen>
+      <Screen name='Processos' component={Processos} options={{title: 'Processos'}}></Screen>
+      <Screen name='CadastrarProcessos' component={CadastrarProcessos} options={{ title: 'Cadastrar Processos' }}></Screen>
+     
 
     </Navigator>
   );
