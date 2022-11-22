@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Button, Text, Input, Image } from '@rneui/base';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { login } from '../service/auth.service';
 import AuthContext from '../contexts/auth';
 import logoTST from '../assets/logo_tst.png';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from './RootStackParamList';
+import * as LocalAuthentication from 'expo-local-authentication'
+
 
 
 const BASE_URI_logo = Image.resolveAssetSource(logoTST).uri;
@@ -20,12 +22,69 @@ const vw = screen.width;
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 
-export default function Login({navigation }: Props) {
-  const { signed, user, token, signIn } = useContext(AuthContext);
+export default function Login({ navigation }: Props) {
+  const { signed, biometriaValida, user, token, signIn } = useContext(AuthContext);
 
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
 
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const [biometric, setBiometric] = useState(false);
+
+
+  // Check if hardware supports biometrics
+  useEffect(() => {
+    (async () => {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      setIsBiometricSupported(compatible);
+      if (compatible)
+        handleBiometricAuth()
+    })();
+
+
+  }, []);
+
+
+
+
+
+  const handleBiometricAuth = async () => {
+    if ((user != null) && (token != '')) {
+      // verificar se tem biometria salva
+      console.log("Entrou")
+      const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
+      if (!savedBiometrics) {
+        return Alert.alert(
+          'Biometria não cadastrada',
+          'Por favor, confirme seu login com usuário e senha',
+          [{ text: "OK", onPress: () => console.log("Não encontrado biometria") }]
+        );
+      } else {
+
+        let LocalAuthenticationOptions = {
+          promptMessage: "Login com Biometria",
+          cancelLabel: "Cancelar",
+          disableDeviceFallback: true
+        }
+
+        let result = await LocalAuthentication.authenticateAsync(LocalAuthenticationOptions);
+        if (result.success) {
+          setBiometric(true)
+          biometriaValida()
+          return
+        }
+      }
+
+    }
+    return
+
+  }
+
+
+  // if (isBiometricSupported && !biometric && (user != null) && (token != '')) {
+  //   handleBiometricAuth()
+  //   return
+  // }
 
   function clickLogin() {
     signIn(username, password)
@@ -77,7 +136,7 @@ export default function Login({navigation }: Props) {
             marginTop: 10,
           }}
           titleStyle={{ marginHorizontal: 20, color: 'black' }}
-         
+
           onPress={() => navigation.navigate('AddUser')}
         />
 

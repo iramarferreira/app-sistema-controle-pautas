@@ -6,6 +6,7 @@ import {api} from "../service/api";
 
 interface AuthContextData {
     signed: boolean;
+    biometriaValida(): void;
     token: string;
     user: object | null;
     loading: boolean;
@@ -33,7 +34,7 @@ export const AuthProvider = (props: any) => {
             if (storagedUser && storagedToken) {
                 setUser(JSON.parse(storagedUser));
                 setToken(storagedToken)
-                setSigned(true)
+                // setSigned(true)
                 api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
 
             }
@@ -43,6 +44,10 @@ export const AuthProvider = (props: any) => {
 
         loadStorageData();
     });
+
+    function biometriaValida(){
+        setSigned(true)
+    }
 
     // Função para fazer login
     async function signIn(username: string, password: string) {
@@ -94,7 +99,7 @@ export const AuthProvider = (props: any) => {
 
     return (
         <AuthContext.Provider value={
-            { signed: signed, token: token, user: user, loading, signIn, signOut }
+            { signed: signed,biometriaValida, token: token, user: user, loading, signIn, signOut }
         }>
             {props.children}
         </AuthContext.Provider>
