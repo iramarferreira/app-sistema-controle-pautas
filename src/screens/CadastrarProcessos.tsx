@@ -44,13 +44,18 @@ export default function CadastrarProcessos() {
             resumo: resumeProcess
         }
         
-        axios.post('/processos',{...process})
+        try {
+            await axios.post('processo',{...process})
             .then(function (response) {
                 alert(response);
             })
             .catch(function (error) {
                 alert(error);
             });
+        } catch (err) {
+            alert(err)
+        }
+        
     }
 
     return (
