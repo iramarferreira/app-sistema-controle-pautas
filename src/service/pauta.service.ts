@@ -17,7 +17,7 @@ export const getPautas = () => {
     return api
         .get('/pautas')
         .then((response) => {
-            console.log(response)
+            // console.log(response)
             return response.data;
         });
 };
@@ -41,7 +41,6 @@ export const getPautaId = (id: String) => {
 };
 
 export const postPauta = (pauta: PautaReq) => {
-
     return api
         .post('/pauta',
             JSON.stringify(pauta), {
@@ -54,6 +53,21 @@ export const postPauta = (pauta: PautaReq) => {
         .then((response) => {
             console.log(response.data)
             return response.data;
+        });
+};
+
+export const deletePauta = (id: string) => {
+    return api
+        .delete(`/pauta/${id}`,
+           {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }
+        )
+        .then((response) => {
+            // console.log(response)
+            return response;
         });
 };
 
