@@ -129,5 +129,6 @@ const styles = StyleSheet.create({
     registerProcess: {
         marginLeft: 10,
         marginRight: 10,
+        width: 50,
     }
 });  

@@ -88,3 +88,21 @@ export const postVinculacaoListPauta = (pauta: any, processos: any) => {
             return response.data;
         });
 };
+
+export const postVinculacaoProcessoPauta = (pauta: any, processo: any) => {
+
+    console.log(processo)
+    return api
+        .post(`/pauta/${pauta.id}/processo`,
+            JSON.stringify(processo), {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }
+
+        )
+        .then((response) => {
+            console.log(response.data)
+            return response.data;
+        });
+};
