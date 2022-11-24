@@ -83,7 +83,7 @@ export default function Pautas({ navigation }) {
         return (
             <>
                 <Button
-                    onPress={() => navigation.navigate('CadastrarProcesso', item)}
+                    onPress={() => navigation.navigate('CadastrarProcesso')}
                     icon={<Icon name="edit" size={25} color="#01426A" />}
                     buttonStyle={{ minHeight: '100%', minWidth: '50%', backgroundColor: 'light-gray', borderRightWidth: 1 }}
                 />
@@ -126,7 +126,6 @@ export default function Pautas({ navigation }) {
                     {
                         (processos.length) > 0 &&
                         <View>
-                            <Text style={styles.textTitleProcesso}>Processos</Text>
                             <FlatList
                                 keyExtractor={item => item.id}
                                 data={processos}

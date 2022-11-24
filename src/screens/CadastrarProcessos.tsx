@@ -1,10 +1,11 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
 import { Text, Button, Input } from '@rneui/base';
-import { useState, useContext  } from 'react';
+import { useState, useContext, useEffect  } from 'react';
 import AuthContext from '../contexts/auth';
-import {getProcessoId} from '../service/processos.service';
+import {getProcessoId, postProcesso} from '../service/processos.service';
 import {api} from "../service/api";
 import axios from 'axios';
+import { getPautas } from '../service/pauta.service';
 
 const screen = Dimensions.get("screen");
 
@@ -18,6 +19,27 @@ export default function CadastrarProcessos() {
     const [ partsProcess, setPartsProcess ] = useState("");
     const [ reporterProcess, setReporterProcess ] = useState("");
     const [ resumeProcess, setResumeProcess ] = useState("");
+    const [ pautas, setPautas ] = useState<any[]>([]);
+
+    useEffect(()=>{
+        carregarPautas()
+    }, [])
+
+    async function carregarPautas() {
+        getPautas()
+            .then(function(res: any[]){
+                const newPautas = res.map(pauta => {
+                    const stringPauta = `${pauta.orgaoJudicante} - ${pauta.dataPublicacao[1]}/${pauta.dataPublicacao[2]}`
+                    return { stringPauta, id: pauta.id }
+                })
+                setPautas(newPautas)
+
+            })
+            .catch(function(err){
+                console.log(err)
+            })
+            console.log(pautas)
+    }
 
     async function registerProcess() {
         if(numberProcess == ''){
@@ -45,9 +67,9 @@ export default function CadastrarProcessos() {
         }
         
         try {
-            await axios.post('processo',{...process})
+            await postProcesso(process)
             .then(function (response) {
-                alert(response);
+                alert("Processo Cadastrado com successo!");
             })
             .catch(function (error) {
                 alert(error);
@@ -55,6 +77,11 @@ export default function CadastrarProcessos() {
         } catch (err) {
             alert(err)
         }
+
+        setNumberProcess('')
+        setPartsProcess('')
+        setReporterProcess('')
+        setResumeProcess('')
         
     }
 
@@ -63,6 +90,7 @@ export default function CadastrarProcessos() {
         <View style={styles.container}>
             <View style = {styles.dataProcess}>
                 <Text style={styles.text}>Pauta: </Text>
+
             </View>
             <View style = {styles.dataProcess}>
                 <Text style={styles.text}>Dados do Processo:</Text>
@@ -86,8 +114,7 @@ export default function CadastrarProcessos() {
                     onChangeText={value => setResumeProcess(value)}
 
                     />
-
-                <Button title='Cadastrar' style={styles.registerProcess} onPress={registerProcess}></Button>
+                <Button title='Cadastrar' buttonStyle={{ backgroundColor: '#01426A', width: '80%', alignSelf: 'center' }} onPress={registerProcess} />
             </View>
 
         </View>
@@ -126,9 +153,4 @@ const styles = StyleSheet.create({
         padding: 0,
         width: vw,
     },
-    registerProcess: {
-        marginLeft: 10,
-        marginRight: 10,
-        width: 50,
-    }
 });  
