@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Dimensions, ActivityIndicator, Alert } from 'react-native';
-import { Button, Text, Input, Image } from '@rneui/base';
+import { Button, Text, Input, Image, Icon } from '@rneui/base';
 import { useState, useContext, useEffect } from 'react';
 import { login } from '../service/auth.service';
 import AuthContext from '../contexts/auth';
@@ -31,7 +31,8 @@ export default function Login({ navigation }: Props) {
 
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [biometric, setBiometric] = useState(false);
-
+  const [passwordVisibility, setPasswordVisibility] = useState(true);
+  const [rightIcon, setRightIcon] = useState('visibility');
 
   // Check if hardware supports biometrics
   useEffect(() => {
@@ -96,6 +97,15 @@ export default function Login({ navigation }: Props) {
 
   }
 
+  const handlePasswordVisibility = () => {
+    if (rightIcon === 'visibility') {
+      setRightIcon('visibility-off');
+      setPasswordVisibility(!passwordVisibility);
+    } else if (rightIcon === 'visibility-off') {
+      setRightIcon('visibility');
+      setPasswordVisibility(!passwordVisibility);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -111,6 +121,12 @@ export default function Login({ navigation }: Props) {
       <View style={styles.viewForm}>
         {/* <Text style={styles.text}>Username</Text> */}
         <Input style={styles.textInput}
+          leftIcon={
+            <Icon
+              name='supervised-user-circle'
+              size={24}
+            />
+          }
           placeholder='Nome do usuário'
           onChangeText={value => setUsername(value)}
 
@@ -118,12 +134,21 @@ export default function Login({ navigation }: Props) {
 
         <Input style={styles.textInput}
           placeholder='senha'
-          secureTextEntry={true}
+          rightIcon={
+            <Icon
+              name={rightIcon}
+              size={24}
+              onPress={() => handlePasswordVisibility()}
+            />
+          }
+
+          secureTextEntry={passwordVisibility}
           onChangeText={value => setPassword(value)}
         />
 
         <Button
           title='Entrar'
+
           loading={loadingLogin}
           buttonStyle={{
             backgroundColor: '#01426A',

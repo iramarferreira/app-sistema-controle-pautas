@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Dimensions, ActivityIndicator, Alert } from 'react-native';
-import { Button, Text, Input, Image } from '@rneui/base';
+import { Button, Text, Input, Image, Icon } from '@rneui/base';
 import { useState, useContext } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AuthContext from '../contexts/auth';
@@ -28,7 +28,8 @@ export default function AddUser({navigation }: Props) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [loadingAdd, setLoadingAdd] = useState(false);
-
+  const [passwordVisibility, setPasswordVisibility] = useState(true);
+  const [rightIcon, setRightIcon] = useState('visibility');
 
 
   async function cadastrarUser() {
@@ -75,6 +76,15 @@ export default function AddUser({navigation }: Props) {
    
   }
 
+  const handlePasswordVisibility = () => {
+    if (rightIcon === 'visibility') {
+      setRightIcon('visibility-off');
+      setPasswordVisibility(!passwordVisibility);
+    } else if (rightIcon === 'visibility-off') {
+      setRightIcon('visibility');
+      setPasswordVisibility(!passwordVisibility);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -89,19 +99,39 @@ export default function AddUser({navigation }: Props) {
 
       <View style={styles.viewForm}>
         {/* <Text style={styles.text}>Username</Text> */}
-        <Input style={styles.textInput}
+        <Input 
+          style={styles.textInput}
+          leftIcon={
+            <Icon
+              name='supervised-user-circle'
+              size={24}
+            />
+          }
           placeholder='Nome do usuário'
           onChangeText={value => setUsername(value)}
 
         />
 
         <Input style={styles.textInput}
+          rightIcon={
+            <Icon
+              name={rightIcon}
+              size={24}
+              onPress={() => handlePasswordVisibility()}
+          />
+        }
           placeholder='Senha (6 a 40 caracteres)'
-          secureTextEntry={true}
+          secureTextEntry={passwordVisibility}
           onChangeText={value => setPassword(value)}
         />
 
         <Input style={styles.textInput}
+         leftIcon={
+          <Icon
+            name='email'
+            size={24}
+          />
+        }
           placeholder='Email'
           onChangeText={value => setEmail(value)}
         />
