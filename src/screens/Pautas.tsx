@@ -4,6 +4,7 @@ import { useState, useContext, useEffect } from 'react';
 import AuthContext from '../contexts/auth';
 import { getPautas, deletePauta } from '../service/pauta.service';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useIsFocused } from '@react-navigation/native';
 
 
 
@@ -19,7 +20,7 @@ export default function Pautas({ navigation }) {
     const [pautasDay, setPautasDay] = useState<any>([])
     const [pautasMes, setPautasMes] = useState<any>([])
 
-
+    const isFocused = useIsFocused();
 
     const { signOut } = useContext(AuthContext)
 
@@ -28,7 +29,7 @@ export default function Pautas({ navigation }) {
         carregarDados()
    
         console.log('teste')
-    }, [])
+    }, [isFocused])
 
 
 
@@ -77,13 +78,14 @@ export default function Pautas({ navigation }) {
         let arrayMes: any = []
         arr.forEach((element: any) => {
             if (element.dataSessao[0] == date.getFullYear() &&
-                element.dataSessao[1] == date.getMonth() &&
+                element.dataSessao[1] == date.getMonth()+1 &&
                 element.dataSessao[2] == date.getDate()) {
                 arrayDay.push(element)
             }
             else if (element.dataSessao[0] == date.getFullYear() &&
-                element.dataSessao[1] == date.getMonth() &&
-                element.dataSessao[2] != date.getDate()) {
+                element.dataSessao[1] == date.getMonth()+1 &&
+                element.dataSessao[2] != date.getDate() &&
+                element.dataSessao[2] > date.getDate()) {
                 arrayMes.push(element)
             }
         });
@@ -116,7 +118,7 @@ export default function Pautas({ navigation }) {
         return (
             <>
                 <Button
-                    onPress={() => navigation.navigate('CadastrarPauta', item)}
+                    onPress={() => navigation.navigate('CadastrarPauta', {item ,update: true})}
                     icon={<Icon name="edit" size={25} color="#01426A" />}
                     buttonStyle={{ minHeight: '100%', minWidth: '50%', backgroundColor: 'light-gray', borderRightWidth: 1 }}
                 />
@@ -193,7 +195,7 @@ export default function Pautas({ navigation }) {
         <View>
 
             {isLoading ?
-                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <View style={{height: '100%', flex: 0, justifyContent: "center", alignItems: "center" }}>
                     <ActivityIndicator size="large" color="#666" />
                 </View>
 

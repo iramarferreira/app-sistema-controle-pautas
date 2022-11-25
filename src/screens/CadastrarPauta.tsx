@@ -1,19 +1,38 @@
-import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, Alert } from 'react-native';
 import { Text, Button } from '@rneui/base';
-import { useState, useContext  } from 'react';
+import { useState, useContext, useEffect  } from 'react';
 import AuthContext from '../contexts/auth';
 import {getProcessoId} from '../service/processos.service';
 import {api} from "../service/api";
 
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { postPauta } from '../service/pauta.service';
+import { postPauta, putPauta } from '../service/pauta.service';
+import { useIsFocused } from '@react-navigation/native';
 
 const screen = Dimensions.get("screen");
 
 const vh = screen.height;
 const vw = screen.width;
 
-export default function CadastrarPauta() {
+type CadastrarPautaProps = {
+    item: Items,
+    update: boolean
+}
+type Params = {
+    params: CadastrarPautaProps
+}
+
+type Items = {
+    orgaoJudicante: string,
+    sistemaPauta: string,
+    meioJulgamento: string,
+    dataSessao: number[]
+    id: string
+}
+
+export default function CadastrarPauta({navigation, route}) {
+
+    console.log(route)
 
     const {signOut} = useContext(AuthContext)
     const [ turmaSelected, setTurmaSelected ] = useState(-1)
@@ -22,6 +41,8 @@ export default function CadastrarPauta() {
     const [ loadingCadastro, setLoadingCadastro ] = useState(false);
 
     const [date, setDate] = useState(new Date());
+
+    const isFocused = useIsFocused();
 
     const turmas = [
         { id: 1, name: '1ª Turma' },
@@ -50,6 +71,30 @@ export default function CadastrarPauta() {
         { name: 'VIRTUAL' },
         { name: 'PRESENCIAL' }
     ]
+
+    useEffect(()=>{
+        if(route?.params?.update && route.params.update == true){
+            navigation.setOptions({ title: 'Atualizar Pauta' })
+
+            const ano = route.params.item.dataSessao[0]
+            const mes = route.params.item.dataSessao[1]-1
+            const dia = route.params.item.dataSessao[2]
+            setTurmaSelected(busca(turmas, route.params.item.orgaoJudicante))
+            setSistemaSelected(busca(sistemas, route.params.item.sistemaPauta))
+            setMeioSelected(busca(meios, route.params.item.meioJulgamento))
+            setDate(new Date(ano, mes, dia))
+            console.log("AKIIII")
+        }
+    }, [isFocused])
+
+    function busca(array, name){
+        for(let i =0; i<array.length; i++){
+            if(array[i].name == name){
+                return i;
+            }
+        }
+        return -1
+    }
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate;
@@ -87,7 +132,7 @@ export default function CadastrarPauta() {
         try {
             await postPauta(pauta)
             .then(function (response) {
-                alert("Pauta Cadastrada com successo!");
+                Alert.alert("","Pauta Cadastrada com successo!");
             })
             .catch(function (error) {
                 alert(error);
@@ -100,6 +145,47 @@ export default function CadastrarPauta() {
         setSistemaSelected(-1)
         setMeioSelected(-1)
         setLoadingCadastro(false)
+
+        navigation.navigate('Pautas')
+    }
+
+    async function updatePauta() {
+        setLoadingCadastro(true)
+
+        const pauta = {
+            orgaoJudicante: turmas[turmaSelected].name,
+            sistemaPauta: sistemas[sistemaSelected].name,
+            meioJulgamento: meios[meioSelected].name,
+            dataSessao: date,
+            dataDivulgacao: new Date(),
+            dataPublicacao: new Date(),
+            id: route.params.item.id
+        }
+
+        
+        try {
+            await putPauta(pauta)
+            .then(function (response) {
+                Alert.alert("","Pauta atualizada com successo!");
+            })
+            .catch(function (error) {
+                alert(error);
+            });
+        } catch (err) {
+            alert(err)
+        }
+
+        setTurmaSelected(-1)
+        setSistemaSelected(-1)
+        setMeioSelected(-1)
+        setDate(new Date())
+        setLoadingCadastro(false)
+
+        route.params.update = false
+
+        navigation.setOptions({ title: 'Cadastrar Pauta' })
+        navigation.navigate('Pautas')
+
     }
 
     return (
@@ -160,11 +246,11 @@ export default function CadastrarPauta() {
             <View style={styles.viewButton}>
 
                 <Button 
-                        title='Cadastrar' 
+                        title={route?.params?.update == true ? 'Atualizar' :'Cadastrar'} 
                         loading={loadingCadastro}
                         disabled={(turmaSelected == -1) || (sistemaSelected == -1) || (meioSelected == -1)}
                         buttonStyle={{ backgroundColor: '#01426A', alignSelf: 'center', width: '80%' }} 
-                        onPress={registerPauta}
+                        onPress={route?.params?.update ? updatePauta : registerPauta}
                         />
             </View>
         </View>
@@ -206,7 +292,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 2,
         borderWidth: 1,
-        borderColor: "#01426A"
+        borderColor: "#01426A",
     },
     viewSistem: {
         width: '80%',

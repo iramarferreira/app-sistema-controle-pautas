@@ -8,6 +8,7 @@ interface PautaReq {
     dataSessao: Date,
     dataDivulgacao: Date,
     dataPublicacao: Date,
+    id?: string
 }
 
 
@@ -43,6 +44,22 @@ export const getPautaId = (id: String) => {
 export const postPauta = (pauta: PautaReq) => {
     return api
         .post('/pauta',
+            JSON.stringify(pauta), {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }
+
+        )
+        .then((response) => {
+            console.log(response.data)
+            return response.data;
+        });
+};
+
+export const putPauta = (pauta: PautaReq) => {
+    return api
+        .put(`/pauta/${pauta.id}`,
             JSON.stringify(pauta), {
             headers: {
                 "Content-Type": "application/json",
