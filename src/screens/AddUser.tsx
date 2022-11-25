@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Button, Text, Input, Image } from '@rneui/base';
 import { useState, useContext } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -27,10 +27,12 @@ export default function AddUser({navigation }: Props) {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [loadingAdd, setLoadingAdd] = useState(false);
 
 
 
   async function cadastrarUser() {
+    setLoadingAdd(true)
     let roles = ['user']
     let userRegister: UserRegister = {};
     if(username == ''){
@@ -50,25 +52,26 @@ export default function AddUser({navigation }: Props) {
     await register(userRegister)
       .then((res) => {
         if(res.status === 200){
-          alert("Usuário cadastrado")
+          Alert.alert('Usuário cadastrado', 'Agora realize o login')
           navigation.navigate('Login')
         }else{
-          alert('Aconteceu algum erro no cadastro do usuário')
-          alert(res.data)
+          Alert.alert('Erro','Aconteceu algum erro no cadastro do usuário')
+          Alert.alert(res.data)
         }
       })
       .catch((e) => {
         console.log(e.response.data)
         if(e.response.status === 400 && e.response.data?.message.includes('Username')){
-          alert('Nome de usuário já existente')
+          Alert.alert('Erro','Nome de usuário já existente')
         }
         else if(e.response.status === 400 && e.response.data?.message.includes('Email')){
-          alert('Email já existente')
+          Alert.alert('Erro','Email já existente')
         }
         else if(e.response.status === 500){
-          alert('Error')
+          Alert.alert('Error')
         }
     })
+    setLoadingAdd(false)
    
   }
 
@@ -106,6 +109,7 @@ export default function AddUser({navigation }: Props) {
 
         <Button
           title='Cadastrar'
+          loading={loadingAdd}
           buttonStyle={{
             backgroundColor: '#01426A',
           }}

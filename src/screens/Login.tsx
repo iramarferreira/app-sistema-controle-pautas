@@ -27,6 +27,7 @@ export default function Login({ navigation }: Props) {
 
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [loadingLogin, setLoadingLogin] = useState(false);
 
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [biometric, setBiometric] = useState(false);
@@ -86,10 +87,13 @@ export default function Login({ navigation }: Props) {
   //   return
   // }
 
-  function clickLogin() {
-    signIn(username, password)
+  async function clickLogin() {
+    setLoadingLogin(true)
+    await signIn(username, password)
     console.log(token)
     console.log(user)
+    setLoadingLogin(false)
+
   }
 
 
@@ -120,6 +124,7 @@ export default function Login({ navigation }: Props) {
 
         <Button
           title='Entrar'
+          loading={loadingLogin}
           buttonStyle={{
             backgroundColor: '#01426A',
           }}

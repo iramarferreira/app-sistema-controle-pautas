@@ -1,7 +1,9 @@
 import { createContext, useState, useEffect } from "react";
 import * as authService from '../service/auth.service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {api} from "../service/api";
+import { api } from "../service/api";
+import { Alert } from 'react-native';
+
 
 
 interface AuthContextData {
@@ -30,7 +32,7 @@ export const AuthProvider = (props: any) => {
         async function loadStorageData() {
             const storagedUser = await AsyncStorage.getItem('@user');
             const storagedToken = await AsyncStorage.getItem('@token');
-           
+
             if (storagedUser && storagedToken) {
                 setUser(JSON.parse(storagedUser));
                 setToken(storagedToken)
@@ -45,16 +47,16 @@ export const AuthProvider = (props: any) => {
         loadStorageData();
     });
 
-    function biometriaValida(){
+    function biometriaValida() {
         setSigned(true)
     }
 
     // Função para fazer login
     async function signIn(username: string, password: string) {
 
-        if(username == '' || password == ''){
+        if (username == '' || password == '') {
             alert('Preenche todos os campos')
-            return 
+            return
         }
 
         let response = undefined
@@ -65,13 +67,18 @@ export const AuthProvider = (props: any) => {
 
             },
             (error) => {
-                alert(error)
+                if (error.response.status === 401) {
+                    Alert.alert('Dados inválidos', 'usuário e/ou senha inválidos')
+                }
+                else if (error.response.status === 500) {
+                    Alert.alert('Error')
+                }
             }
         )
 
         if (response) {
             api.defaults.headers.Authorization = `Baerer ${response.token}`;
-            
+
             setToken(response.token);
             let userResponse = {
 
@@ -99,7 +106,7 @@ export const AuthProvider = (props: any) => {
 
     return (
         <AuthContext.Provider value={
-            { signed: signed,biometriaValida, token: token, user: user, loading, signIn, signOut }
+            { signed: signed, biometriaValida, token: token, user: user, loading, signIn, signOut }
         }>
             {props.children}
         </AuthContext.Provider>

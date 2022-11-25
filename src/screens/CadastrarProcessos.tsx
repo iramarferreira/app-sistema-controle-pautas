@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, Alert } from 'react-native';
 import { Text, Button, Input } from '@rneui/base';
 import { useState, useContext, useEffect  } from 'react';
 import AuthContext from '../contexts/auth';
@@ -26,6 +26,7 @@ export default function CadastrarProcessos() {
     const [ resumeProcess, setResumeProcess ] = useState("");
     const [ pautas, setPautas ] = useState<Pautas[]>([]);
     const [ pautaSelected, setPautaSelected ] = useState(-1)
+    const [ loadingCadastro, setLoadingCadastro ] = useState(false);
 
     useEffect(()=>{
         carregarPautas()
@@ -48,6 +49,7 @@ export default function CadastrarProcessos() {
     }
 
     async function registerProcess() {
+        setLoadingCadastro(true)
         if(pautaSelected == -1){
             alert('Selecione a pauta')
             return 
@@ -92,10 +94,11 @@ export default function CadastrarProcessos() {
         async function vincularProcessoPauta(res: any){
             await postVinculacaoProcessoPauta(pautas[pautaSelected], res)
             .then(function (response) {
-                alert("Processo Cadastrado com successo!");
+                Alert.alert("", "Processo cadastrado com successo!");
             })
             .catch(function (error) {
-                alert(error);
+                // Alert.alert(error);
+                Alert.alert("Erro", "Aconteceu algum erro");
             });
         }
 
@@ -104,7 +107,7 @@ export default function CadastrarProcessos() {
         setReporterProcess('')
         setResumeProcess('')
         setPautaSelected(-1)
-        
+        setLoadingCadastro(false)
     }
 
     return (
@@ -152,7 +155,12 @@ export default function CadastrarProcessos() {
                     onChangeText={value => setResumeProcess(value)}
 
                     />
-                <Button title='Cadastrar' buttonStyle={{ backgroundColor: '#01426A', width: '80%', alignSelf: 'center' }} onPress={registerProcess} />
+                <Button 
+                    title='Cadastrar' 
+                    loading={loadingCadastro}
+                    disabled={(pautaSelected == -1) || (numberProcess == '') || (partsProcess == '') || (reporterProcess == '') || (resumeProcess == '')}
+                    buttonStyle={{ backgroundColor: '#01426A', width: '80%', alignSelf: 'center' }} 
+                    onPress={registerProcess} />
             </View>
 
         </View>
