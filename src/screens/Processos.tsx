@@ -4,7 +4,7 @@ import { useState, useContext, useEffect } from 'react';
 import AuthContext from '../contexts/auth';
 import {deleteProcesso, getProcessoId} from '../service/processos.service';
 import {api} from "../service/api";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
 
 import { getProcessos } from '../service/processos.service';
@@ -26,12 +26,13 @@ export default function Pautas({ navigation }) {
 
     const { signOut } = useContext(AuthContext)
 
+    const isFocused = useIsFocused();
+
     useEffect(() => {
         carregarDados()
    
         console.log('teste')
-        setIsLoading(false)
-    }, [])
+    }, [isFocused])
 
 
 
@@ -44,6 +45,9 @@ export default function Pautas({ navigation }) {
             .catch((e) => {
                 console.log(e)
             })
+
+        setIsLoading(false)
+        
     }
 
 
@@ -62,7 +66,7 @@ export default function Pautas({ navigation }) {
 
     function confirmRemoverProcesso(item) {
         console.log(item)
-        Alert.alert('Excluir Pauta', 'Deseja excluir a pauta?', [
+        Alert.alert('Excluir Processo', 'Deseja excluir a Processo?', [
             {
                 text: 'Sim',
                 onPress() {
@@ -83,7 +87,7 @@ export default function Pautas({ navigation }) {
         return (
             <>
                 <Button
-                    onPress={() => navigation.navigate('CadastrarProcesso')}
+                    onPress={() => navigation.navigate('CadastrarProcessos', {item ,update: true})}
                     icon={<Icon name="edit" size={25} color="#01426A" />}
                     buttonStyle={{ minHeight: '100%', minWidth: '50%', backgroundColor: 'light-gray', borderRightWidth: 1 }}
                 />

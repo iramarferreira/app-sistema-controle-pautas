@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Text, Button, Input } from '@rneui/base';
 import { useState, useContext, useEffect  } from 'react';
 import AuthContext from '../contexts/auth';
@@ -6,6 +6,7 @@ import {getProcessoId, postProcesso} from '../service/processos.service';
 import {api} from "../service/api";
 import axios from 'axios';
 import { getPautas, postVinculacaoProcessoPauta } from '../service/pauta.service';
+import { useIsFocused } from '@react-navigation/native';
 
 const screen = Dimensions.get("screen");
 
@@ -17,7 +18,8 @@ type Pautas = {
     id: string
 }
 
-export default function CadastrarProcessos() {
+export default function CadastrarProcessos({navigation, route}) {
+
 
     const {signOut} = useContext(AuthContext)
     const [ numberProcess, setNumberProcess ] = useState("");
@@ -27,18 +29,57 @@ export default function CadastrarProcessos() {
     const [ pautas, setPautas ] = useState<Pautas[]>([]);
     const [ pautaSelected, setPautaSelected ] = useState(-1)
     const [ loadingCadastro, setLoadingCadastro ] = useState(false);
+    const [ loadingPautas, setLoadingPautas ] = useState(true)
+
+    const isFocused = useIsFocused()
 
     useEffect(()=>{
-        carregarPautas()
-    }, [])
+        (async () => {
+            await carregarPautas()
+        })();
+
+        if(route?.params?.update && route.params.update == true){
+            navigation.setOptions({ title: 'Atualizar Processo' })
+
+            setNumberProcess(route.params.item.numero)
+            setPartsProcess(route.params.item.partes)
+            setReporterProcess(route.params.item.relator)
+            setResumeProcess(route.params.item.resumo)
+            setPautaSelected(busca(pautas, route.params.item.id))
+            
+        }
+        
+    }, [isFocused])
+
+    function busca(array, id){
+        console.log("AKIIII")
+        console.log(pautaSelected)
+        for(let i = 0; i<array.length; i++){
+            if(array[i].id == id){
+                return i;
+            }
+        }
+        return -1
+    }
 
     async function carregarPautas() {
         getPautas()
             .then(function(res: any[]){
-                const newPautas = res.map(pauta => {
-                    const stringPauta = `${pauta.orgaoJudicante} - ${pauta.dataPublicacao[1]}/${pauta.dataPublicacao[2]}`
+                const dateCurrent = new Date();
+                const filterPautas = res.filter((pauta)=>{
+                    if (pauta.dataSessao[0] >= dateCurrent.getFullYear() &&
+                        pauta.dataSessao[1] >= dateCurrent.getMonth()+1 &&
+                        pauta.dataSessao[2] >= dateCurrent.getDate()) {
+                        return pauta
+                    }
+                })
+                
+                const newPautas = filterPautas.map(pauta => {
+                    const stringPauta = `${pauta.orgaoJudicante} - ${pauta.dataSessao[2]}/${pauta.dataSessao[1]}`
                     return { stringPauta, id: pauta.id}
                 })
+                console.log(newPautas)
+
                 setPautas(newPautas)
 
             })
@@ -46,6 +87,7 @@ export default function CadastrarProcessos() {
                 console.log(err)
             })
             console.log(pautas)
+            setLoadingPautas(false)
     }
 
     async function registerProcess() {
@@ -110,24 +152,69 @@ export default function CadastrarProcessos() {
         setLoadingCadastro(false)
     }
 
+    async function updateProcess() {
+        setLoadingCadastro(true)
+        if(pautaSelected == -1){
+            alert('Selecione a pauta')
+            return 
+        }
+        else if(numberProcess == ''){
+            alert('Preenche o número do processo')
+            return 
+        }
+        else if(partsProcess == ''){
+            alert('Preenche as partes do processo')
+            return 
+        }
+        else if(reporterProcess == ''){
+            alert('Preenche o relator do processo')
+            return 
+        }
+        else if(resumeProcess == ''){
+            alert('Preenche o resumo do processo')
+            return 
+        }
+
+        Alert.alert("","Processo atualizado com sucesso")
+
+        setNumberProcess('')
+        setPartsProcess('')
+        setReporterProcess('')
+        setResumeProcess('')
+        setPautaSelected(-1)
+        setLoadingCadastro(false)
+
+        route.params.update = false
+
+        navigation.setOptions({ title: 'Cadastrar Processo' })
+        navigation.navigate('Processos')
+    }
+
+
     return (
 
         <View style={styles.container}>
             <View style = {styles.dataProcessPauta}>
                 <Text style={styles.textPauta}>Pauta: </Text>
-                <ScrollView style={styles.scroll}>
-                    {
-                        pautas.map((pauta, key) => {
-                            return(
-                                <Button key={key} buttonStyle={key != pautaSelected ? styles.scrollContent : styles.scrollContentSelected } onPress={()=>setPautaSelected(key)}>
-
-                                    <Text style={{color: 'white', fontWeight: 'bold'}}>{`${pauta.stringPauta}`}</Text>
-                                </Button>
-                            )
-                        })
-                    }
+                {
                     
-                </ScrollView>
+                    loadingPautas ?
+                    <ActivityIndicator size="large" color="#666" />
+                    :
+                    <ScrollView style={styles.scroll}>
+                        {
+                            pautas.map((pauta, key) => {
+                                return(
+                                    <Button key={key} buttonStyle={key != pautaSelected ? styles.scrollContent : styles.scrollContentSelected } onPress={()=>setPautaSelected(key)}>
+
+                                        <Text style={{color: 'white', fontWeight: 'bold'}}>{`${pauta.stringPauta}`}</Text>
+                                    </Button>
+                                )
+                            })
+                        }
+                        
+                    </ScrollView>
+                }
             </View>
             <View style = {styles.dataProcess}>
                 <Text style={styles.text}>Dados do Processo:</Text>
@@ -156,11 +243,11 @@ export default function CadastrarProcessos() {
 
                     />
                 <Button 
-                    title='Cadastrar' 
+                    title={route?.params?.update == true ? 'Atualizar' :'Cadastrar'} 
                     loading={loadingCadastro}
                     disabled={(pautaSelected == -1) || (numberProcess == '') || (partsProcess == '') || (reporterProcess == '') || (resumeProcess == '')}
                     buttonStyle={{ backgroundColor: '#01426A', width: '80%', alignSelf: 'center' }} 
-                    onPress={registerProcess} />
+                    onPress={route?.params?.update ? updateProcess : registerProcess} />
             </View>
 
         </View>
@@ -178,7 +265,7 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
       backgroundColor: '#fff',
     },
     textInput: {
@@ -205,6 +292,7 @@ const styles = StyleSheet.create({
     },
     dataProcessPauta: {
         margin: 0,
+        marginBottom: 24,
         padding: 0,
         width: vw,
         alignItems: 'center'

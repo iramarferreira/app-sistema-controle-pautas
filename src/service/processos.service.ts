@@ -60,6 +60,23 @@ export const postProcesso = (processo: ProcessoReq) => {
         });
 };
 
+export const putProcesso = (processo: ProcessoReq) => {
+
+    return api
+        .put('/processo',
+            JSON.stringify(processo), {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }
+
+        )
+        .then((response) => {
+            console.log(response.data)
+            return response.data;
+        });
+};
+
 
 export const deleteProcesso = (id: String) => {
 
