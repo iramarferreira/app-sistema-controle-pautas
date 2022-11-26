@@ -133,7 +133,7 @@ export default function Login({ navigation }: Props) {
         />
 
         <Input style={styles.textInput}
-          placeholder='senha'
+          placeholder='Senha'
           rightIcon={
             <Icon
               name={rightIcon}
